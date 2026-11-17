@@ -16,7 +16,7 @@ function fn(name) {
   throw new Error('unbalanced ' + name);
 }
 const Bj = src.match(/var Bj=(`[^`]*`\.split\(`\.`\))/)[1];
-const lib = new Function(`const Bj=${Bj};${fn('Lj')}${fn('Rj')}${fn('zj')}${fn('Ij')}${fn('saTidyProfile')}
+const lib = new Function(`const Bj=${Bj};${fn('Lj')}${fn('Rj')}${fn('saResideYes')}${fn('zj')}${fn('Ij')}${fn('saTidyProfile')}
   return { Rj, zj, Ij, saTidyProfile };`)();
 
 const profile = {
@@ -40,6 +40,19 @@ ok(ask('Are you at least 18 years of age?') === 'Yes', '"at least 18 years of ag
 ok(ask('Are you over the age of 18?', ['Yes', 'No']) === 'Yes', '"over the age of 18" → Yes');
 ok(ask('Will you now or in the future require visa sponsorship?', ['Yes', 'No']) === 'No', 'sponsorship rule still answers');
 ok(ask('Please share your LinkedIn profile') === 'https://www.linkedin.com/in/me/', 'LinkedIn rule still answers');
+
+console.log('Reside in …');
+{
+  const no = [{ keywords: ['reside'], appearances: 1, response: 'No' }]; // a saved "No" must not win
+  ok(ask('Do you currently reside in the United States?', ['Yes', 'No'], no) === 'Yes', 'United States → Yes');
+  ok(ask('Are you currently living in the UK?', ['Yes', 'No'], no) === 'Yes', 'UK → Yes');
+  ok(ask('Are you based in Canada?', ['Yes, I am', 'No, I am not'], no) === 'Yes, I am', 'Canada → the form\'s own "Yes" wording');
+  ok(ask('Do you live in Germany?', ['Yes', 'No']) === 'Yes' && ask('Are you located in Switzerland?', ['Yes', 'No']) === 'Yes', 'European countries → Yes');
+  ok(ask('Are you currently based in the EU?', ['Yes', 'No']) === 'Yes', 'the EU → Yes');
+  ok(ask('Do you currently reside in Australia?', ['Yes', 'No'], no) === 'No', 'Australia → your saved answer');
+  ok(ask('Are you willing to relocate to the United States?', ['Yes', 'No'], [{ keywords: ['relocate'], appearances: 1, response: 'No' }]) === 'No', 'relocation is not a residence question');
+  ok(ask('Will you require visa sponsorship in the US?', ['Yes', 'No']) === 'No', 'sponsorship keeps its own rule');
+}
 
 console.log('Profile tidy');
 {
@@ -67,6 +80,14 @@ console.log('Workday websites');
 ok(/async function mI\(e\)\{let saQ=\{LinkedIn:/.test(src) && /t=LA\(e\)\.filter\(e=>!\(saQ\[e\.name\]&&document\.querySelector\(saQ\[e\.name\]\)\)\)/.test(src),
   'LinkedIn/GitHub/website typed into their own questions are not added to Websites again');
 ok(/e\(saTidyProfile\(dl\.parse\(t\.profile\)\)\)/.test(src), 'the profile is tidied where the content script loads it');
+ok(/textarea`,!0\)\}\/\*\[sa\+\][^]*?try\{self\.__lazyWdSections&&await self\.__lazyWdSections\.reconcile\(\{resume_data:\{workExperience:e\}\},document\)\}catch\(x\)\{\}\}async function lI\(/.test(src),
+  'after Work Experience is filled, every entry is checked against your profile (wd-sections.js)');
+{
+  const man = JSON.parse(fs.readFileSync(path.join(EXT, 'manifest.json'), 'utf8'));
+  const js = man.content_scripts[0].js;
+  ok(js.indexOf('content-scripts/wd-sections.js') === 0 && js.includes('content-scripts/content.js'), 'wd-sections.js loads before content.js');
+  ok(fs.existsSync(path.join(EXT, 'content-scripts/wd-sections.js')), 'wd-sections.js is in the extension');
+}
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

@@ -4,7 +4,23 @@ SpeedyApply 2.28.3 from the Chrome Web Store, with fixes carried over from the
 LazyApply and Jobright Autofill logs. Load the
 `Download SpeedyApply Job Application Autofill Tool` folder with
 **chrome://extensions → Developer mode → Load unpacked**. The version shows as
-2.28.3.1.
+2.28.3.2.
+
+## 2.28.3.2
+
+- **Workday Work Experience is checked entry by entry after filling**
+  (`content-scripts/wd-sections.js`, the same check LazyApply uses). Workday's
+  CV parser pre-fills entries, sometimes with the same job twice, e.g. entry 2
+  as Meta with From 01/2023 and To 12/2022, which Workday refuses with "Must
+  end after start date". Each entry is now compared with the profile job at the
+  same place (entry 1 = first job, ...). Title, company, location, description,
+  "I currently work here" and From / To are corrected where they differ. Values
+  are set through the input's native setter, so Workday keeps them. Missing
+  entries are added and extra ones deleted. Clicking "I currently work here" no
+  longer unticks a box the parser had already ticked.
+- **"Do you currently reside / live / are you based in X?" → Yes** when X is a
+  European country (or "the EU"), the UK, the United States or Canada. This is
+  checked before your saved answers (`saResideYes`, in `zj`).
 
 ## 2.28.3.1
 
